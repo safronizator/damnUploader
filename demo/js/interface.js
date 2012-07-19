@@ -89,7 +89,7 @@ $(document).ready(function() {
 
     // преобразование формата dataURI в Blob-данные
     function dataURItoBlob(dataURI) {
-        var BlobBuilder = (window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder);
+        var BlobBuilder = (window.MSBlobBuilder || window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder);
         if (!BlobBuilder) {
             return false;
         }
