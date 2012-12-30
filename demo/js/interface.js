@@ -72,6 +72,9 @@ $(document).ready(function() {
     // Вывод в консоль
     function log(str) {
         $('<p/>').html(str).prependTo($console);
+        if (window.console !== undefined) {
+            window.console.log(str);
+        }
     }
 
     // Вывод инфы о выбранных
@@ -179,11 +182,14 @@ $(document).ready(function() {
         };
 
         // ... и помещаем его в очередь
-        var queueId = fileInput.damnUploader('addItem', uploadItem);
+        var queueId = fileInput.duAdd(uploadItem);
 
         // обработчик нажатия ссылки "отмена"
         cancelButton.click(function() {
-            fileInput.damnUploader('cancel', queueId);
+            //fileInput.trigger('uploader.test', queueId);
+            //fileInput.damnUploader('cancel', queueId);
+            //fileInput.trigger('uploader.cancel', queueId);
+            fileInput.duCancel(queueId);
             li.remove();
             imgCount--;
             imgSize -= file.fake ? 0 : file.size;
@@ -221,13 +227,13 @@ $(document).ready(function() {
     // Обаботка события нажатия на кнопку "Загрузить все".
     // стартуем все загрузки
     $("#upload-all").click(function() {
-        fileInput.damnUploader('startUpload');
+        fileInput.duStart();
     });
 
 
     // Обработка события нажатия на кнопку "Отменить все"
     $("#cancel-all").click(function() {
-        fileInput.damnUploader('cancelAll');
+        fileInput.duCancelAll();
         imgCount = 0;
         imgSize = 0;
         updateInfo();
