@@ -16,7 +16,7 @@
     });
 
 
-    // generating uniq id
+    // generates uniq id
     var uniq = function (length, prefix) {
         length = parseInt(length);
         prefix = prefix || '';
@@ -52,6 +52,7 @@
 
         ////////////////////////////////////////////////////////////////////////
         // initialization
+
         /* default settings */
         self._damnUploaderSettings = $.extend({
             url: '/upload.php',
@@ -88,7 +89,7 @@
                         return true;
                     }
                 }
-                self.duAdd(file);
+                self.damnAdd(file);
                 return true;
             }
             if (files instanceof FileList) {
@@ -103,7 +104,7 @@
                             return true;
                         }
                     }
-                    self.duAdd({ file: file });
+                    self.damnAdd({ file: file });
                 });
             }
             return true;
@@ -182,7 +183,8 @@
 
 
 
-        /* binding callbacks */
+        ////////////////////////////////////////////////////////////////////////
+        // interface elements event handling
         var isFileField = ((self.get(0).tagName == 'INPUT') && (this.attr('type') == 'file'));
 
         if (isFileField) {
@@ -229,7 +231,12 @@
             }
         }
 
-        self.duStart = function () {
+
+        ////////////////////////////////////////////////////////////////////////
+        // API control methods
+
+        // Start all uploads
+        self.damnStart = function () {
             if (!set.url) {
                 return self;
             }
@@ -257,7 +264,8 @@
             return self;
         };
 
-        self.duCancel = function (queueId) {
+        // Dequeue upload item by it's id
+        self.damnCancel = function (queueId) {
             if (queueId && self._damnUploaderItemsCount > 0) {
                 if (!$.support.fileSelecting) {
                     var removingItem = $('#' + queueId);
@@ -280,19 +288,21 @@
             return self;
         };
 
-        self.duCancelAll = function () {
+        // Cancel all uploads & clear queue
+        self.damnCancelAll = function () {
             if (!$.support.fileSelecting) {
                 self._damnUploaderItemsCount = 0;
                 self._damnUploaderFakeForm.empty();
                 return self;
             }
             $.each(queue, function (key, item) {
-                self.duCancel(key);
+                self.damnCancel(key);
             });
             return self;
         };
 
-        self.duAdd = function (uploadItem) {
+        // Enqueue upload item
+        self.damnAdd = function (uploadItem) {
             if (!uploadItem || !uploadItem.file) {
                 return false;
             }
@@ -318,25 +328,26 @@
             return queueId;
         };
 
-        self.duCount = function () {
+        // Returns queued items count
+        self.damnCount = function () {
             return self._damnUploaderItemsCount;
         };
 
-        self.duOption = function (name, value) {
+        // Change plugin option (url, mutliple, fieldName, limit are changeable) or get it value by id
+        self.damnOption = function (name, value) {
             var acceptParams = ['url', 'multiple', 'fieldName', 'limit'];
             if (value === undefined) {
                 return self._damnUploaderSettings[name];
             }
             if ($.isPlainObject(name)) {
                 $.each(name, function (key, val) {
-                    self.duOption(key, val);
+                    self.damnOption(key, val);
                 });
             } else {
                 $.inArray(name, acceptParams) && (self._damnUploaderSettings[key] = value);
             }
             return self;
         };
-
 
         return self;
     };
