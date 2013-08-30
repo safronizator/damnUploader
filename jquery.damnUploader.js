@@ -64,7 +64,8 @@
             fieldName: 'file',
             dropping: true,
             dropBox: false,
-            limit: false
+            limit: false,
+            dataType: 'text'
         }, params || {});
 
         // upload item object
@@ -169,7 +170,8 @@
                             callbackDefined && item.completeCallback.call(item, false, null, 0);
                         } else {
                             $.isFunction(item.progressCallback) && item.progressCallback.call(item, 100);
-                            callbackDefined && item.completeCallback.call(item, true, this.responseText);
+                            var response = set.dataType == 'json' ? $.parseJSON(this.responseText) : this.responseText;
+                            callbackDefined && item.completeCallback.call(item, true, response);
                         }
                     } else {
                         callbackDefined && item.completeCallback.call(item, false, null, this.status);
