@@ -44,17 +44,17 @@
         }
 
         // context
-        var self = this;
+        var $this = this;
 
         // locals
-        var queue = self._damnUploaderQueue;
-        var set = self._damnUploaderSettings || {};
+        var queue = $this._damnUploaderQueue;
+        var set = $this._damnUploaderSettings || {};
 
         ////////////////////////////////////////////////////////////////////////
         // initialization
 
         /* default settings */
-        self._damnUploaderSettings = $.extend({
+        $this._damnUploaderSettings = $.extend({
             url: '/upload.php',
             multiple: true,
             fieldName: 'file',
@@ -67,17 +67,17 @@
         }, params || {});
 
         /* private properties */
-        self._damnUploaderQueue = {};
-        self._damnUploaderItemsCount = 0;
-        queue = self._damnUploaderQueue;
-        set = self._damnUploaderSettings;
+        $this._damnUploaderQueue = {};
+        $this._damnUploaderItemsCount = 0;
+        queue = $this._damnUploaderQueue;
+        set = $this._damnUploaderSettings;
 
         /* private items-adding method */
-        self._damnUploaderFilesAddMap = function (files, callback) {
+        $this._damnUploaderFilesAddMap = function (files, callback) {
             var callbackDefined = $.isFunction(callback);
             if (!$.support.fileSelecting) {
-                if (self._damnUploaderItemsCount === set.limit) {
-                    return $.isFunction(set.onLimitExceeded) ? set.onLimitExceeded.call(self) : false;
+                if ($this._damnUploaderItemsCount === set.limit) {
+                    return $.isFunction(set.onLimitExceeded) ? set.onLimitExceeded.call($this) : false;
                 }
                 var file = {
                     fake: true,
@@ -85,26 +85,26 @@
                     inputElement: files
                 };
                 if (callbackDefined) {
-                    if (!callback.call(self, file)) {
+                    if (!callback.call($this, file)) {
                         return true;
                     }
                 }
-                self.damnAdd(file);
+                $this.damnAdd(file);
                 return true;
             }
             if (files instanceof FileList) {
                 $.each(files, function (i, file) {
-                    if (self._damnUploaderItemsCount === set.limit) {
-                        if (self._damnUploaderItemsCount === set.limit) {
-                            return $.isFunction(set.onLimitExceeded) ? set.onLimitExceeded.call(self) : false;
+                    if ($this._damnUploaderItemsCount === set.limit) {
+                        if ($this._damnUploaderItemsCount === set.limit) {
+                            return $.isFunction(set.onLimitExceeded) ? set.onLimitExceeded.call($this) : false;
                         }
                     }
                     if (callbackDefined) {
-                        if (!callback.call(self, file)) {
+                        if (!callback.call($this, file)) {
                             return true;
                         }
                     }
-                    self.damnAdd({ file: file });
+                    $this.damnAdd({ file: file });
                 });
             }
             return true;
@@ -112,7 +112,7 @@
 
 
         /* private file-uploading method */
-        self._damnUploaderUploadItem = function (url, item) {
+        $this._damnUploaderUploadItem = function (url, item) {
             if (!checkIsFile(item.file)) {
                 return false;
             }
@@ -185,46 +185,46 @@
 
         ////////////////////////////////////////////////////////////////////////
         // interface elements event handling
-        var isFileField = ((self.get(0).tagName == 'INPUT') && (this.attr('type') == 'file'));
+        var isFileField = (($this.get(0).tagName == 'INPUT') && (this.attr('type') == 'file'));
 
         if (isFileField) {
-            var myName = self.eq(0).attr('name');
+            var myName = $this.eq(0).attr('name');
             if (!$.support.fileSelecting) {
                 if (myName.charAt(myName.length - 1) != ']') {
                     myName += '[]';
                 }
-                self.attr('name', myName);
-                self.attr('multiple', false);
-                var action = self.parents('form').attr('action');
-                self._damnUploaderFakeForm = $('<form/>').attr({
+                $this.attr('name', myName);
+                $this.attr('multiple', false);
+                var action = $this.parents('form').attr('action');
+                $this._damnUploaderFakeForm = $('<form/>').attr({
                     method: 'post',
                     enctype: 'multipart/form-data',
                     action: action
                 }).hide().appendTo('body');
             } else {
-                self.attr('multiple', true);
+                $this.attr('multiple', true);
             }
 
-            self._damnUploaderChangeCallback = function () {
-                self._damnUploaderFilesAddMap($.support.fileSelecting ? this.files : this, set.onSelect);
+            $this._damnUploaderChangeCallback = function () {
+                $this._damnUploaderFilesAddMap($.support.fileSelecting ? this.files : this, set.onSelect);
             };
 
-            self.on({
-                change: self._damnUploaderChangeCallback
+            $this.on({
+                change: $this._damnUploaderChangeCallback
             });
         }
 
         if (set.dropping) {
-            self.on({
+            $this.on({
                 drop: function (e) {
-                    self._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files, set.onSelect);
+                    $this._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files, set.onSelect);
                     return false;
                 }
             });
             if (set.dropBox) {
                 $(set.dropBox).on({
                     drop: function (e) {
-                        self._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files, set.onSelect);
+                        $this._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files, set.onSelect);
                         return false;
                     }
                 });
@@ -236,13 +236,13 @@
         // API control methods
 
         // Start all uploads
-        self.damnStart = function () {
+        $this.damnStart = function () {
             if (!set.url) {
-                return self;
+                return $this;
             }
             if (!$.support.fileSelecting) {
-                self._damnUploaderFakeForm.submit();
-                return self;
+                $this._damnUploaderFakeForm.submit();
+                return $this;
             }
             $.each(queue, function (queueId, item) {
                 var compl = item.onComplete;
@@ -250,30 +250,30 @@
                 item.onComplete = function (successful, data, error) {
                     if (!this.cancelled) {
                         delete queue[queueId];
-                        self._damnUploaderItemsCount--;
+                        $this._damnUploaderItemsCount--;
                     }
                     if ($.isFunction(compl)) {
                         compl.call(this, successful, data, error);
                     }
-                    if ((self._damnUploaderItemsCount == 0) && ($.isFunction(set.onAllComplete))) {
-                        set.onAllComplete.call(self);
+                    if (($this._damnUploaderItemsCount == 0) && ($.isFunction(set.onAllComplete))) {
+                        set.onAllComplete.call($this);
                     }
                 };
-                self._damnUploaderUploadItem(set.url, item);
+                $this._damnUploaderUploadItem(set.url, item);
             });
-            return self;
+            return $this;
         };
 
         // Dequeue upload item by it's id
-        self.damnCancel = function (queueId) {
-            if (queueId && self._damnUploaderItemsCount > 0) {
+        $this.damnCancel = function (queueId) {
+            if (queueId && $this._damnUploaderItemsCount > 0) {
                 if (!$.support.fileSelecting) {
                     var removingItem = $('#' + queueId);
                     if (removingItem.length > 0) {
                         removingItem.remove();
-                        self._damnUploaderItemsCount--;
+                        $this._damnUploaderItemsCount--;
                     }
-                    return self;
+                    return $this;
                 }
 
                 if (queue[queueId] !== undefined) {
@@ -282,27 +282,27 @@
                         queue[queueId].xhr.abort();
                     }
                     delete queue[queueId];
-                    self._damnUploaderItemsCount--;
+                    $this._damnUploaderItemsCount--;
                 }
             }
-            return self;
+            return $this;
         };
 
         // Cancel all uploads & clear queue
-        self.damnCancelAll = function () {
+        $this.damnCancelAll = function () {
             if (!$.support.fileSelecting) {
-                self._damnUploaderItemsCount = 0;
-                self._damnUploaderFakeForm.empty();
-                return self;
+                $this._damnUploaderItemsCount = 0;
+                $this._damnUploaderFakeForm.empty();
+                return $this;
             }
             $.each(queue, function (key, item) {
-                self.damnCancel(key);
+                $this.damnCancel(key);
             });
-            return self;
+            return $this;
         };
 
         // Enqueue upload item
-        self.damnAdd = function (uploadItem) {
+        $this.damnAdd = function (uploadItem) {
             if (!uploadItem || !uploadItem.file) {
                 return false;
             }
@@ -313,42 +313,42 @@
                 var cloned = $(input).clone();
                 $(input).before(cloned);
                 $(input).attr('id', queueId);
-                $(input).appendTo(self._damnUploaderFakeForm);
+                $(input).appendTo($this._damnUploaderFakeForm);
                 cloned.on({
-                    change: self._damnUploaderChangeCallback
+                    change: $this._damnUploaderChangeCallback
                 });
-                self._damnUploaderItemsCount++;
+                $this._damnUploaderItemsCount++;
                 return queueId;
             }
             if (!checkIsFile(uploadItem.file)) {
                 return false;
             }
             queue[queueId] = uploadItem;
-            self._damnUploaderItemsCount++;
+            $this._damnUploaderItemsCount++;
             return queueId;
         };
 
         // Returns queued items count
-        self.damnCount = function () {
-            return self._damnUploaderItemsCount;
+        $this.damnCount = function () {
+            return $this._damnUploaderItemsCount;
         };
 
         // Change plugin option (url, mutliple, fieldName, limit are changeable) or get it value by id
-        self.damnOption = function (name, value) {
+        $this.damnOption = function (name, value) {
             var acceptParams = ['url', 'multiple', 'fieldName', 'limit'];
             if (value === undefined) {
-                return self._damnUploaderSettings[name];
+                return $this._damnUploaderSettings[name];
             }
             if ($.isPlainObject(name)) {
                 $.each(name, function (key, val) {
-                    self.damnOption(key, val);
+                    $this.damnOption(key, val);
                 });
             } else {
-                $.inArray(name, acceptParams) && (self._damnUploaderSettings[key] = value);
+                $.inArray(name, acceptParams) && ($this._damnUploaderSettings[key] = value);
             }
-            return self;
+            return $this;
         };
 
-        return self;
+        return $this;
     };
 })(window.jQuery);
