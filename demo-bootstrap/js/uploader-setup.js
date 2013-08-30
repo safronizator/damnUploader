@@ -3,6 +3,9 @@
     $(function() {
         var $fileInput = $('#file-input');
         var $dropBox = $('#drop-box');
+        var $uploadForm = $('#upload-form');
+        var $uploadRows = $('#upload-rows');
+        var $clearBtn = $('#clear-btn');
 
         $fileInput.damnUploader({
             // куда отправлять
@@ -33,6 +36,44 @@
             }
         });
 
+        var createRowFromUploadItem = function(ui) {
+            var $row = $('<tr/>').prependTo($uploadRows);
+            var $progressBar = $('<div/>').addClass('progress-bar').css('width', '0%');
+            var $pbWrapper = $('<div/>').addClass('progress').append($progressBar);
+            $('<td/>').html('<i>no preview</i>').appendTo($row); // Preview
+            $('<td/>').text(ui.file.name).appendTo($row); // Filename
+            $('<td/>').text(Math.round(ui.file.size / 1024) + ' KB').appendTo($row); // Size in KB
+            $('<td/>').append($pbWrapper).appendTo($row); // Status
+            return $progressBar;
+        };
+
+        var fileAddHandler = function(e) {
+            var ui = e.uploadItem;
+            var $progressBar = createRowFromUploadItem(ui);
+            ui.completeCallback = function(success, data, errorCode) {
+                log('******');
+                log(this.file.name + " completed");
+                if (success) {
+                    log('recieved data:', data);
+                } else {
+                    log('uploading failed. Response code is:', errorCode);
+                }
+            };
+            ui.progressCallback = function(percent) {
+                $progressBar.css('width', Math.round(percent) + '%');
+            };
+            // e.preventDefault(); // To cancel adding
+        };
+
+
+        $fileInput.on('uploader.add', fileAddHandler);
+
+        $uploadForm.on('submit', function(e) {
+            var postData = $uploadForm.serializeArray();
+            e.preventDefault();
+            $fileInput.uploaderStart();
+        });
+
     });
 
 })(window.jQuery);
@@ -52,5 +93,5 @@ if(!$.support.fileSelecting) {
     if(!$.support.fileSending) {
         log("[-] Your browser doesn't support FormData object (files will be send with manually formed requests)");
     }
-    log("select some files to see what happen ...");
+    log("Now select some files to see what happen ...");
 }

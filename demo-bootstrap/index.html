@@ -38,11 +38,12 @@
         <div class="row">
             <div class="well well-lg auto-tip" id="drop-box" data-title="... or just drop it here" data-placement="bottom">
                 <form class="form-inline" role="form" id="upload-form" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="test-value-from-form" value="test" />
                     <div class="form-group">
                         <input type="file" class="form-control auto-tip" id="file-input" data-title="You can select one or more files by system menu" />
                     </div>
-                    <button type="submit" class="btn btn-primary btn-std pull-right">Send</button>
-                    <button type="submit" class="btn btn-danger btn-std pull-right">Clear</button>
+                    <button id="send-btn" type="submit" class="btn btn-primary btn-std pull-right">Send</button>
+                    <button id="clear-btn" class="btn btn-danger btn-std pull-right">Clear</button>
                 </form>
             </div>
         </div>
@@ -57,18 +58,7 @@
                         <th>Status</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td><i>no preview</i></td>
-                        <td>test.png</td>
-                        <td>128.05 KB</td>
-                        <td>
-                            <div class="progress">
-                                <div class="progress-bar" role="progressbar" style="width: 60%;"></div>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
+                <tbody id="upload-rows"></tbody>
             </table>
         </div>
 

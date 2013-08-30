@@ -1,6 +1,6 @@
 // Shorthand log function
-window.log = function(data) {
-    window.console && window.console.log && window.console.log(data);
+window.log = function() {
+    window.console && window.console.log && window.console.log.apply(window.console, arguments);
 };
 
 (function($) {
