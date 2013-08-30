@@ -7,49 +7,45 @@
         var $uploadRows = $('#upload-rows');
         var $clearBtn = $('#clear-btn');
 
+        ///// Uploader init
         $fileInput.damnUploader({
-            // куда отправлять
+            // URL of server uploads handler
             url: './serverLogic.php',
-            // имитация имени поля с файлом (будет ключом в $_FILES, если используется PHP)
+            // File POST field name (for ex., it will be used as key in $_FILES array, if you using PHP)
             fieldName:  'my-pic',
-            // дополнительно: элемент, на который можно перетащить файлы (либо объект jQuery, либо селектор)
+            // Container for handling drag&drops (not required)
             dropBox: $dropBox,
-            // максимальное кол-во выбранных файлов (если не указано - без ограничений)
+            // Limiting queued files count (if not defined - queue will be unlimited)
             limit: 5,
-            // когда максимальное кол-во достигнуто (вызывается при каждой попытке добавить еще файлы)
-            onLimitExceeded: function() {
-                log('Допустимое кол-во файлов уже выбрано');
-            },
-            // ручная обработка события выбора файла (в случае, если выбрано несколько, будет вызвано для каждого)
-            // если обработчик возвращает true, файлы добавляются в очередь автоматически
-            onSelect: function(file) {
-                console.log(file);
-                //addFileToQueue(file);
-                //return false;
-            },
-            // когда все загружены
-            onAllComplete: function() {
-                log('All uploads completed!');
-                imgCount = 0;
-                imgSize = 0;
-                //updateInfo();
-            }
+            // Expected response type ('text' or 'json')
+            dataType: 'json'
         });
 
+
+        ///// Misc funcs
+
+        // Creates queue table row with file information and upload status
         var createRowFromUploadItem = function(ui) {
             var $row = $('<tr/>').prependTo($uploadRows);
             var $progressBar = $('<div/>').addClass('progress-bar').css('width', '0%');
             var $pbWrapper = $('<div/>').addClass('progress').append($progressBar);
-            $('<td/>').html('<i>no preview</i>').appendTo($row); // Preview
+            $('<td/>').html('<i>not realized</i>').appendTo($row); // Preview
             $('<td/>').text(ui.file.name).appendTo($row); // Filename
             $('<td/>').text(Math.round(ui.file.size / 1024) + ' KB').appendTo($row); // Size in KB
             $('<td/>').append($pbWrapper).appendTo($row); // Status
             return $progressBar;
         };
 
+        // File adding handler
         var fileAddHandler = function(e) {
+            // e.uploadItem represents uploader task as special object,
+            // where we can define complete & progress callbacks as well as some another parameters
+            // for every single upload
             var ui = e.uploadItem;
+            var filename = ui.file.name;
             var $progressBar = createRowFromUploadItem(ui);
+
+            // Show info and response when upload completed
             ui.completeCallback = function(success, data, errorCode) {
                 log('******');
                 log(this.file.name + " completed");
@@ -59,17 +55,51 @@
                     log('uploading failed. Response code is:', errorCode);
                 }
             };
+
+            // Updating progress bar value in progress callback
             ui.progressCallback = function(percent) {
                 $progressBar.css('width', Math.round(percent) + '%');
             };
+
+            // We can replace original filename if needed
+            if (filename.length > 14) {
+                ui.replaceName = filename.substr(0, 10) + "_" + filename.substr(filename.lastIndexOf('.'));
+            }
+
+            // We can add some data to POST in upload request
+            ui.addPostData($uploadForm.serializeArray()); // from array
+            ui.addPostData('original-filename', filename); // .. or as field/value pair
+
             // e.preventDefault(); // To cancel adding
         };
 
 
-        $fileInput.on('uploader.add', fileAddHandler);
+        ///// Setting up events handlers
 
+        // Uploader events
+        $fileInput.on({
+            'uploader.add' : fileAddHandler,
+
+            'uploader.limit' : function() {
+                log("File upload limit exceeded!");
+            },
+
+            'uploader.completed' : function() {
+                log('******');
+                log("All uploads completed!");
+            }
+        });
+
+        // Clear button
+        $clearBtn.on('click', function() {
+            $fileInput.uploaderCancelAll();
+            $uploadRows.empty();
+            log('******');
+            log("All uploads canceled :(");
+        });
+
+        // Form submit
         $uploadForm.on('submit', function(e) {
-            var postData = $uploadForm.serializeArray();
             e.preventDefault();
             $fileInput.uploaderStart();
         });
