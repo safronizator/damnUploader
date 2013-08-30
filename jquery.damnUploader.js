@@ -1,20 +1,23 @@
-(function ($) {
+(function (window, $) {
+
+    var isDefined = function(item) {
+        return (item !== undefined) && (item != null);
+    };
 
     // defining compatibility of upload control object
     var xhrUploadFlag = false;
     if (window.XMLHttpRequest) {
         var testXHR = new XMLHttpRequest();
-        xhrUploadFlag = (testXHR.upload != null);
+        xhrUploadFlag = isDefined(testXHR.upload);
     }
 
     // utility object for checking browser compatibility
     $.extend($.support, {
-        fileSelecting: (window.File != null) && (window.FileList != null),
-        fileReading: (window.FileReader != null),
-        fileSending: (window.FormData != null),
+        fileSelecting: isDefined(window.File) && isDefined(window.FileList),
+        fileReading: isDefined(window.FileReader),
+        fileSending: isDefined(window.FormData),
         uploadControl: xhrUploadFlag
     });
-
 
     // generates uniq id
     var uniq = function (length, prefix) {
@@ -27,6 +30,7 @@
         return prefix + ch + uniq(--length);
     };
 
+    // checking that item is File instance or Blob [that have File compatible API]
     var checkIsFile = function (item) {
         return (item instanceof File) || (item instanceof Blob);
     };
@@ -60,58 +64,59 @@
             fieldName: 'file',
             dropping: true,
             dropBox: false,
-            limit: false,
-            onSelect: false,
-            onLimitExceeded: false,
-            onAllComplete: false
+            limit: false
         }, params || {});
 
-        /* private properties */
+        // upload item object
+        var UploadItem = function(file, completeCallback, progressCallback) {
+            this.file = file;
+            this.progressCallback = progressCallback;
+            this.completeCallback = completeCallback;
+        };
+
+        // private properties
         $this._damnUploaderQueue = {};
         $this._damnUploaderItemsCount = 0;
         queue = $this._damnUploaderQueue;
         set = $this._damnUploaderSettings;
 
-        /* private items-adding method */
+        // private items-adding method
         $this._damnUploaderFilesAddMap = function (files, callback) {
-            var callbackDefined = $.isFunction(callback);
-            var e = jQuery.Event("damn.selected");
+            //var callbackDefined = $.isFunction(callback);
+            var addingEvent = $.Event("uploader.add");
+            var limitEvent = $.Event("uploader.limit");
+            var triggerAndAdd = function(file) {
+                addingEvent.uploadItem = $this.uploaderNewUploadItem(file);
+                $this.trigger(addingEvent);
+                if (!addingEvent.isDefaultPrevented()) {
+                    $this.uploaderAdd(addingEvent.uploadItem);
+                }
+            };
             if (!$.support.fileSelecting) {
                 if ($this._damnUploaderItemsCount === set.limit) {
-                    return $.isFunction(set.onLimitExceeded) ? set.onLimitExceeded.call($this) : false;
+                    $this.trigger(limitEvent);
+                    return false;
                 }
-                var file = {
+                triggerAndAdd({
                     fake: true,
                     name: files.value,
                     inputElement: files
-                };
-                if (callbackDefined) {
-                    if (!callback.call($this, file)) {
-                        return true;
-                    }
-                }
-                $this.uploaderAdd(file);
+                });
                 return true;
             }
             if (files instanceof FileList) {
                 $.each(files, function (i, file) {
                     if ($this._damnUploaderItemsCount === set.limit) {
-                        if ($this._damnUploaderItemsCount === set.limit) {
-                            return $.isFunction(set.onLimitExceeded) ? set.onLimitExceeded.call($this) : false;
-                        }
+                        $this.trigger(limitEvent);
+                        return false;
                     }
-                    if (callbackDefined) {
-                        if (!callback.call($this, file)) {
-                            return true;
-                        }
-                    }
+                    triggerAndAdd(file);
                 });
             }
             return true;
         };
 
-
-        /* private file-uploading method */
+        // private file-uploading method
         $this._damnUploaderUploadItem = function (url, item) {
             if (!checkIsFile(item.file)) {
                 return false;
@@ -124,9 +129,7 @@
                 xhr.upload.addEventListener("progress", function (e) {
                     if (e.lengthComputable) {
                         progress = (e.loaded * 100) / e.total;
-                        if ($.isFunction(item.onProgress)) {
-                            item.onProgress.call(item, Math.round(progress));
-                        }
+                        $.isFunction(item.progressCallback) && item.progressCallback.call(item, Math.round(progress));
                     }
                 }, false);
 
@@ -139,26 +142,18 @@
             }
 
             xhr.onreadystatechange = function () {
-                var callbackDefined = $.isFunction(item.onComplete);
+                var callbackDefined = $.isFunction(item.completeCallback);
                 if (this.readyState == 4) {
                     item.cancelled = item.cancelled || false;
                     if (this.status < 400) {
                         if (!uploaded) {
-                            if (callbackDefined) {
-                                item.onComplete.call(item, false, null, 0);
-                            }
+                            callbackDefined && item.completeCallback.call(item, false, null, 0);
                         } else {
-                            if ($.isFunction(item.onProgress)) {
-                                item.onProgress.call(item, 100);
-                            }
-                            if (callbackDefined) {
-                                item.onComplete.call(item, true, this.responseText);
-                            }
+                            $.isFunction(item.progressCallback) && item.progressCallback.call(item, 100);
+                            callbackDefined && item.completeCallback.call(item, true, this.responseText);
                         }
                     } else {
-                        if (callbackDefined) {
-                            item.onComplete.call(item, false, null, this.status);
-                        }
+                        callbackDefined && item.completeCallback.call(item, false, null, this.status);
                     }
                 }
             };
@@ -167,7 +162,7 @@
             xhr.open("POST", url);
 
             if ($.support.fileSending) {
-                // W3C (Chrome, Safari, Firefox 4+)
+                // W3C (IE9, Chrome, Safari, Firefox 4+)
                 var formData = new FormData();
                 formData.append((item.fieldName || 'file'), item.file);
                 xhr.send(formData);
@@ -180,7 +175,6 @@
             }
             item.xhr = xhr;
         }
-
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -237,9 +231,9 @@
                 return $this;
             }
             $.each(queue, function (queueId, item) {
-                var compl = item.onComplete;
+                var compl = item.completeCallback;
                 item.fieldName = item.fieldName || set.fieldName;
-                item.onComplete = function (successful, data, error) {
+                item.completeCallback = function (successful, data, error) {
                     if (!this.cancelled) {
                         delete queue[queueId];
                         $this._damnUploaderItemsCount--;
@@ -247,8 +241,8 @@
                     if ($.isFunction(compl)) {
                         compl.call(this, successful, data, error);
                     }
-                    if (($this._damnUploaderItemsCount == 0) && ($.isFunction(set.onAllComplete))) {
-                        set.onAllComplete.call($this);
+                    if ($this._damnUploaderItemsCount == 0) {
+                        $this.trigger('uploader.completed');
                     }
                 };
                 $this._damnUploaderUploadItem(set.url, item);
@@ -293,13 +287,19 @@
             return $this;
         };
 
+        $this.uploaderNewUploadItem = function(file) {
+            return new UploadItem(file);
+        };
+
         // Enqueue upload item
         $this.uploaderAdd = function (uploadItem) {
-            if (!uploadItem || !uploadItem.file) {
+            if (checkIsFile(uploadItem)) {
+                uploadItem = $this.uploaderNewUploadItem(uploadItem);
+            }
+            if (!(uploadItem instanceof UploadItem)) {
                 return false;
             }
             var queueId = uniq(5);
-
             if (uploadItem.file.fake) {
                 var input = $(uploadItem.file.inputElement);
                 var cloned = $(input).clone();
@@ -343,4 +343,4 @@
 
         return $this;
     };
-})(window.jQuery);
+})(window, window.jQuery);
