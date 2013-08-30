@@ -1,4 +1,4 @@
-(function (window, $) {
+(function(window, $) {
 
     var isDefined = function(item) {
         return (item !== undefined) && (item != null);
@@ -20,7 +20,7 @@
     });
 
     // generates uniq id
-    var uniq = function (length, prefix) {
+    var uniq = function(length, prefix) {
         length = parseInt(length);
         prefix = prefix || '';
         if ((length == 0) || isNaN(length)) {
@@ -31,13 +31,13 @@
     };
 
     // checking that item is File instance or Blob [that have File compatible API]
-    var checkIsFile = function (item) {
+    var checkIsFile = function(item) {
         return (item instanceof File) || (item instanceof Blob);
     };
 
     ////////////////////////////////////////////////////////////////////////////
     // plugin code
-    $.fn.damnUploader = function (params) {
+    $.fn.damnUploader = function(params) {
 
         if (this.length == 0) {
             return this;
@@ -69,9 +69,28 @@
 
         // upload item object
         var UploadItem = function(file, completeCallback, progressCallback) {
+            this._id = uniq(5);
             this.file = file;
+            this.replaceName = null;
             this.progressCallback = progressCallback;
             this.completeCallback = completeCallback;
+            this._post = [];
+        };
+        UploadItem.prototype.id = function() {
+            return this._id;
+        };
+        UploadItem.prototype.addPostData = function(fieldNameOrFieldsArray, value) {
+            var self = this;
+            if ($.isArray(fieldNameOrFieldsArray)) {
+                $.each(fieldNameOrFieldsArray, function(i, item) {
+                    self.addPostData(item.name, item.value);
+                });
+                return ;
+            }
+            this._post.push({"name" : fieldNameOrFieldsArray, "value" : value});
+        };
+        UploadItem.prototype.cancel = function() {
+            $this.uploaderCancel(this._id);
         };
 
         // private properties
@@ -81,8 +100,7 @@
         set = $this._damnUploaderSettings;
 
         // private items-adding method
-        $this._damnUploaderFilesAddMap = function (files, callback) {
-            //var callbackDefined = $.isFunction(callback);
+        $this._damnUploaderFilesAddMap = function(files) {
             var addingEvent = $.Event("uploader.add");
             var limitEvent = $.Event("uploader.limit");
             var triggerAndAdd = function(file) {
@@ -105,7 +123,7 @@
                 return true;
             }
             if (files instanceof FileList) {
-                $.each(files, function (i, file) {
+                $.each(files, function(i, file) {
                     if ($this._damnUploaderItemsCount === set.limit) {
                         $this.trigger(limitEvent);
                         return false;
@@ -117,23 +135,24 @@
         };
 
         // private file-uploading method
-        $this._damnUploaderUploadItem = function (url, item) {
+        $this._damnUploaderUploadItem = function(url, item) {
             if (!checkIsFile(item.file)) {
                 return false;
             }
             var xhr = new XMLHttpRequest();
             var progress = 0;
             var uploaded = false;
+            var prCall = $.isFunction(item.progressCallback);
 
             if (xhr.upload) {
-                xhr.upload.addEventListener("progress", function (e) {
+                xhr.upload.addEventListener("progress", function(e) {
                     if (e.lengthComputable) {
                         progress = (e.loaded * 100) / e.total;
-                        $.isFunction(item.progressCallback) && item.progressCallback.call(item, Math.round(progress));
+                        prCall && item.progressCallback.call(item, Math.round(progress));
                     }
                 }, false);
 
-                xhr.upload.addEventListener("load", function (e) {
+                xhr.upload.addEventListener("load", function(e) {
                     progress = 100;
                     uploaded = true;
                 }, false);
@@ -141,7 +160,7 @@
                 uploaded = true;
             }
 
-            xhr.onreadystatechange = function () {
+            xhr.onreadystatechange = function() {
                 var callbackDefined = $.isFunction(item.completeCallback);
                 if (this.readyState == 4) {
                     item.cancelled = item.cancelled || false;
@@ -164,11 +183,17 @@
             if ($.support.fileSending) {
                 // W3C (IE9, Chrome, Safari, Firefox 4+)
                 var formData = new FormData();
-                formData.append((item.fieldName || 'file'), item.file);
+                formData.append((item.fieldName || 'file'), item.file, filename);
+                if (item._post.length > 0) {
+                    $.each(item._post, function(i, field) {
+                        formData.append(field.name, field.value);
+                    });
+                }
                 xhr.send(formData);
             } else {
                 // Other
-                xhr.setRequestHeader('Upload-Filename', item.file.name);
+                //TODO: need to review
+                xhr.setRequestHeader('Upload-Filename', filename);
                 xhr.setRequestHeader('Upload-Size', item.file.size);
                 xhr.setRequestHeader('Upload-Type', item.file.type);
                 xhr.send(item.file);
@@ -184,6 +209,7 @@
         if (isFileField) {
             var myName = $this.eq(0).attr('name');
             if (!$.support.fileSelecting) {
+                //TODO: need to review
                 if (myName.charAt(myName.length - 1) != ']') {
                     myName += '[]';
                 }
@@ -199,20 +225,20 @@
                 $this.attr('multiple', true);
             }
 
-            $this._damnUploaderChangeCallback = function () {
-                $this._damnUploaderFilesAddMap($.support.fileSelecting ? this.files : this, set.onSelect);
+            $this._damnUploaderChangeCallback = function() {
+                $this._damnUploaderFilesAddMap($.support.fileSelecting ? this.files : this);
             };
 
             $this.on('change', $this._damnUploaderChangeCallback);
         }
 
         if (set.dropping) {
-            $this.on('drop',  function (e) {
-                $this._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files, set.onSelect);
+            $this.on('drop',  function(e) {
+                $this._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files);
                 return false;
             });
-            set.dropBox && $(set.dropBox).on('drop', function (e) {
-                $this._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files, set.onSelect);
+            set.dropBox && $(set.dropBox).on('drop', function(e) {
+                $this._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files);
                 return false;
             });
         }
@@ -222,7 +248,7 @@
         // API control methods
 
         // Start all uploads
-        $this.uploaderStart = function () {
+        $this.uploaderStart = function() {
             if (!set.url) {
                 return $this;
             }
@@ -230,10 +256,10 @@
                 $this._damnUploaderFakeForm.submit();
                 return $this;
             }
-            $.each(queue, function (queueId, item) {
+            $.each(queue, function(queueId, item) {
                 var compl = item.completeCallback;
                 item.fieldName = item.fieldName || set.fieldName;
-                item.completeCallback = function (successful, data, error) {
+                item.completeCallback = function(successful, data, error) {
                     if (!this.cancelled) {
                         delete queue[queueId];
                         $this._damnUploaderItemsCount--;
@@ -251,7 +277,7 @@
         };
 
         // Dequeue upload item by it's id
-        $this.uploaderCancel = function (queueId) {
+        $this.uploaderCancel = function(queueId) {
             if (queueId && $this._damnUploaderItemsCount > 0) {
                 if (!$.support.fileSelecting) {
                     var removingItem = $('#' + queueId);
@@ -275,13 +301,13 @@
         };
 
         // Cancel all uploads & clear queue
-        $this.uploaderCancelAll = function () {
+        $this.uploaderCancelAll = function() {
             if (!$.support.fileSelecting) {
                 $this._damnUploaderItemsCount = 0;
                 $this._damnUploaderFakeForm.empty();
                 return $this;
             }
-            $.each(queue, function (key, item) {
+            $.each(queue, function(key, item) {
                 $this.uploaderCancel(key);
             });
             return $this;
@@ -292,14 +318,14 @@
         };
 
         // Enqueue upload item
-        $this.uploaderAdd = function (uploadItem) {
+        $this.uploaderAdd = function(uploadItem) {
             if (checkIsFile(uploadItem)) {
                 uploadItem = $this.uploaderNewUploadItem(uploadItem);
             }
             if (!(uploadItem instanceof UploadItem)) {
                 return false;
             }
-            var queueId = uniq(5);
+            var queueId = uploadItem.id();
             if (uploadItem.file.fake) {
                 var input = $(uploadItem.file.inputElement);
                 var cloned = $(input).clone();
@@ -321,18 +347,18 @@
         };
 
         // Returns queued items count
-        $this.uploaderCount = function () {
+        $this.uploaderCount = function() {
             return $this._damnUploaderItemsCount;
         };
 
         // Change plugin option (url, mutliple, fieldName, limit are changeable) or get it value by id
-        $this.uploaderOption = function (name, value) {
+        $this.uploaderOption = function(name, value) {
             var acceptParams = ['url', 'multiple', 'fieldName', 'limit'];
             if (value === undefined) {
                 return $this._damnUploaderSettings[name];
             }
             if ($.isPlainObject(name)) {
-                $.each(name, function (key, val) {
+                $.each(name, function(key, val) {
                     $this.uploaderOption(key, val);
                 });
             } else {
