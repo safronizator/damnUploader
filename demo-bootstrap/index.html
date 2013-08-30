@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>jQuery damnUploader twitter bootstrap based demo (IE only > 8 supported!)</title>
+
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css"/>
+    <link rel="stylesheet" href="./css/custom.css"/>
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.0/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../jquery.damnUploader.js"></script>
+    <script src="./js/interafce.js"></script>
+    <script src="./js/uploader-setup.js"></script>
+
+</head>
+<body>
+    <div class="navbar navbar-inverse navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="./">damnUploader v1.0 demo</a>
+            </div>
+            <div class="collapse navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li><a href="https://github.com/safronizator/damnUploader/">GitHub</a></li>
+                </ul>
+            </div><!--/.nav-collapse -->
+        </div>
+    </div>
+
+    <div class="container">
+
+        <div class="row">
+            <div class="well well-lg auto-tip" id="drop-box" data-title="... or just drop it here" data-placement="bottom">
+                <form class="form-inline" role="form" id="upload-form" method="post" enctype="multipart/form-data">
+                    <div class="form-group">
+                        <input type="file" class="form-control auto-tip" id="file-input" data-title="You can select one or more files by system menu" />
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-std pull-right">Send</button>
+                    <button type="submit" class="btn btn-danger btn-std pull-right">Clear</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="row">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Preview</th>
+                        <th>Original filename</th>
+                        <th>Size</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><i>no preview</i></td>
+                        <td>test.png</td>
+                        <td>128.05 KB</td>
+                        <td>
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 60%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div><!-- /.container -->
+
+    <div id="console-tip-anchor" class="auto-tip" data-title="See debug info in your browser console! (F12 on Windows, Cmd+Alt+I on Mac)"></div>
+</body>
+</html>

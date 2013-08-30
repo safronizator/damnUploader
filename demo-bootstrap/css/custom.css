@@ -1,0 +1,20 @@
+body {
+    padding-top: 80px;
+}
+
+#console-tip-anchor {
+    position: fixed;
+    bottom: 0;
+    right:100px;
+    width: 10px;
+}
+
+.btn-std {
+    margin-left: 1em;
+    min-width: 100px;
+}
+
+.highlighted {
+    background-image: none;
+    background-color: honeydew !important;
+}
