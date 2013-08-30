@@ -75,6 +75,7 @@
         /* private items-adding method */
         $this._damnUploaderFilesAddMap = function (files, callback) {
             var callbackDefined = $.isFunction(callback);
+            var e = jQuery.Event("damn.selected");
             if (!$.support.fileSelecting) {
                 if ($this._damnUploaderItemsCount === set.limit) {
                     return $.isFunction(set.onLimitExceeded) ? set.onLimitExceeded.call($this) : false;
@@ -89,7 +90,7 @@
                         return true;
                     }
                 }
-                $this.damnAdd(file);
+                $this.uploaderAdd(file);
                 return true;
             }
             if (files instanceof FileList) {
@@ -104,7 +105,6 @@
                             return true;
                         }
                     }
-                    $this.damnAdd({ file: file });
                 });
             }
             return true;
@@ -209,26 +209,18 @@
                 $this._damnUploaderFilesAddMap($.support.fileSelecting ? this.files : this, set.onSelect);
             };
 
-            $this.on({
-                change: $this._damnUploaderChangeCallback
-            });
+            $this.on('change', $this._damnUploaderChangeCallback);
         }
 
         if (set.dropping) {
-            $this.on({
-                drop: function (e) {
-                    $this._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files, set.onSelect);
-                    return false;
-                }
+            $this.on('drop',  function (e) {
+                $this._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files, set.onSelect);
+                return false;
             });
-            if (set.dropBox) {
-                $(set.dropBox).on({
-                    drop: function (e) {
-                        $this._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files, set.onSelect);
-                        return false;
-                    }
-                });
-            }
+            set.dropBox && $(set.dropBox).on('drop', function (e) {
+                $this._damnUploaderFilesAddMap(e.originalEvent.dataTransfer.files, set.onSelect);
+                return false;
+            });
         }
 
 
@@ -236,7 +228,7 @@
         // API control methods
 
         // Start all uploads
-        $this.damnStart = function () {
+        $this.uploaderStart = function () {
             if (!set.url) {
                 return $this;
             }
@@ -265,7 +257,7 @@
         };
 
         // Dequeue upload item by it's id
-        $this.damnCancel = function (queueId) {
+        $this.uploaderCancel = function (queueId) {
             if (queueId && $this._damnUploaderItemsCount > 0) {
                 if (!$.support.fileSelecting) {
                     var removingItem = $('#' + queueId);
@@ -289,20 +281,20 @@
         };
 
         // Cancel all uploads & clear queue
-        $this.damnCancelAll = function () {
+        $this.uploaderCancelAll = function () {
             if (!$.support.fileSelecting) {
                 $this._damnUploaderItemsCount = 0;
                 $this._damnUploaderFakeForm.empty();
                 return $this;
             }
             $.each(queue, function (key, item) {
-                $this.damnCancel(key);
+                $this.uploaderCancel(key);
             });
             return $this;
         };
 
         // Enqueue upload item
-        $this.damnAdd = function (uploadItem) {
+        $this.uploaderAdd = function (uploadItem) {
             if (!uploadItem || !uploadItem.file) {
                 return false;
             }
@@ -329,19 +321,19 @@
         };
 
         // Returns queued items count
-        $this.damnCount = function () {
+        $this.uploaderCount = function () {
             return $this._damnUploaderItemsCount;
         };
 
         // Change plugin option (url, mutliple, fieldName, limit are changeable) or get it value by id
-        $this.damnOption = function (name, value) {
+        $this.uploaderOption = function (name, value) {
             var acceptParams = ['url', 'multiple', 'fieldName', 'limit'];
             if (value === undefined) {
                 return $this._damnUploaderSettings[name];
             }
             if ($.isPlainObject(name)) {
                 $.each(name, function (key, val) {
-                    $this.damnOption(key, val);
+                    $this.uploaderOption(key, val);
                 });
             } else {
                 $.inArray(name, acceptParams) && ($this._damnUploaderSettings[key] = value);
