@@ -92,10 +92,13 @@ $(document).ready(function() {
 
     // преобразование формата dataURI в Blob-данные
     function dataURItoBlob(dataURI) {
-        var BlobBuilder = (window.MSBlobBuilder || window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder);
-        if (!BlobBuilder) {
-            return false;
-        }
+        var makeBlob = function(data, mimeType) {
+            if (window.Blob) {
+                return new Blob([data], {type: mimeType});
+            }
+            var BlobBuilder = (window.MSBlobBuilder || window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder);
+            return BlobBuilder ? (new BlobBuilder()).append(ab).getBlob(mimeType) : false;
+        };
         // convert base64 to raw binary data held in a string
         // doesn't handle URLEncoded DataURIs
         var pieces = dataURI.split(',');
@@ -108,10 +111,7 @@ $(document).ready(function() {
         for (var i = 0; i < byteString.length; i++) {
             ia[i] = byteString.charCodeAt(i);
         }
-        // write the ArrayBuffer to a blob, and you're done
-        var bb = new BlobBuilder();
-        bb.append(ab);
-        return bb.getBlob(mimeString);
+        return makeBlob(ab, mimeString);
     }
 
 
