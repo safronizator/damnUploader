@@ -6,6 +6,8 @@
         var $uploadForm = $('#upload-form');
         var $uploadRows = $('#upload-rows');
         var $clearBtn = $('#clear-btn');
+        var $previewsChecker = $('#previews-checker');
+        var previewsOn = true;
 
         ///// Uploader init
         $fileInput.damnUploader({
@@ -29,10 +31,29 @@
             var $row = $('<tr/>').prependTo($uploadRows);
             var $progressBar = $('<div/>').addClass('progress-bar').css('width', '0%');
             var $pbWrapper = $('<div/>').addClass('progress').append($progressBar);
-            $('<td/>').html('<i>not realized</i>').appendTo($row); // Preview
+
+            // Defining cancel button & its handler
+            var $cancelBtn = $('<a/>').attr('href', 'javascript:').append(
+                $('<span/>').addClass('glyphicon glyphicon-remove')
+            ).on('click', function() {
+                var $statusCell =  $pbWrapper.parent();
+                $statusCell.empty().html('<i>cancelled</i>');
+                ui.cancel();
+                log(ui.file.name + ": " + "canceled");
+            });
+
+            // Generating preview (note: it could work slow with large images)
+            var $preview = previewsOn ? $('<img/>').attr('width', 120) : $('<i>no preview</i>');
+            previewsOn && ui.readAs('DataURL', function(e) {
+                $preview.attr('src', e.target.result);
+            });
+
+            // Appending cells to row
+            $('<td/>').append($preview).appendTo($row); // Preview
             $('<td/>').text(ui.file.name).appendTo($row); // Filename
             $('<td/>').text(Math.round(ui.file.size / 1024) + ' KB').appendTo($row); // Size in KB
             $('<td/>').append($pbWrapper).appendTo($row); // Status
+            $('<td/>').append($cancelBtn).appendTo($row); // Cancel button
             return $progressBar;
         };
 
@@ -43,9 +64,25 @@
             // for every single upload
             var ui = e.uploadItem;
             var filename = ui.file.name;
-            var $progressBar = createRowFromUploadItem(ui);
+
+            // We can call preventDefault() method of event to cancel adding
+            if (!ui.file.type.match(/image.*/)) {
+                log(filename + ": is not image. Only images accepted!");
+                e.preventDefault();
+                return ;
+            }
+
+            // We can replace original filename if needed
+            if (filename.length > 14) {
+                ui.replaceName = filename.substr(0, 10) + "_" + filename.substr(filename.lastIndexOf('.'));
+            }
+
+            // We can add some data to POST in upload request
+            ui.addPostData($uploadForm.serializeArray()); // from array
+            ui.addPostData('original-filename', filename); // .. or as field/value pair
 
             // Show info and response when upload completed
+            var $progressBar = createRowFromUploadItem(ui);
             ui.completeCallback = function(success, data, errorCode) {
                 log('******');
                 log(this.file.name + " completed");
@@ -60,17 +97,6 @@
             ui.progressCallback = function(percent) {
                 $progressBar.css('width', Math.round(percent) + '%');
             };
-
-            // We can replace original filename if needed
-            if (filename.length > 14) {
-                ui.replaceName = filename.substr(0, 10) + "_" + filename.substr(filename.lastIndexOf('.'));
-            }
-
-            // We can add some data to POST in upload request
-            ui.addPostData($uploadForm.serializeArray()); // from array
-            ui.addPostData('original-filename', filename); // .. or as field/value pair
-
-            // e.preventDefault(); // To cancel adding
         };
 
 
@@ -96,6 +122,11 @@
             $uploadRows.empty();
             log('******');
             log("All uploads canceled :(");
+        });
+
+        // Previews generating switcher
+        $previewsChecker.on('change', function() {
+            previewsOn = $previewsChecker.prop('checked');
         });
 
         // Form submit
