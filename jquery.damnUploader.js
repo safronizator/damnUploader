@@ -77,22 +77,38 @@
             this.completeCallback = completeCallback;
             this._post = [];
         };
-        UploadItem.prototype.id = function() {
-            return this._id;
-        };
-        UploadItem.prototype.addPostData = function(fieldNameOrFieldsArray, value) {
-            var self = this;
-            if ($.isArray(fieldNameOrFieldsArray)) {
-                $.each(fieldNameOrFieldsArray, function(i, item) {
-                    self.addPostData(item.name, item.value);
-                });
-                return ;
+        $.extend(UploadItem.prototype, {
+            id : function() {
+                return this._id;
+            },
+            addPostData: function(fieldNameOrFieldsArray, value) {
+                var self = this;
+                if ($.isArray(fieldNameOrFieldsArray)) {
+                    $.each(fieldNameOrFieldsArray, function(i, item) {
+                        self.addPostData(item.name, item.value);
+                    });
+                    return ;
+                }
+                this._post.push({"name" : fieldNameOrFieldsArray, "value" : value});
+            },
+            cancel: function() {
+                $this.uploaderCancel(this._id);
+            },
+            getReaderCallback: function(callback) {
+                var reader;
+                if ($.support.fileReading) {
+                    reader = new FileReader();
+                    reader.onload = callback;
+                }
+                return reader;
+            },
+            readAs: function(as, callback) {
+                var methodName = 'readAs' + as;
+                var reader = this.getReaderCallback(callback);
+                reader && reader[methodName] && reader[methodName].call(reader, this.file);
             }
-            this._post.push({"name" : fieldNameOrFieldsArray, "value" : value});
-        };
-        UploadItem.prototype.cancel = function() {
-            $this.uploaderCancel(this._id);
-        };
+        });
+
 
         // private properties
         $this._damnUploaderQueue = {};
