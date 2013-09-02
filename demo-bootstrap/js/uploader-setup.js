@@ -125,6 +125,9 @@
             ui.progressCallback = function(percent) {
                 $progressBar.css('width', Math.round(percent) + '%');
             };
+
+            // To start uploads immediately as added
+            // ui.upload();
         };
 
 
