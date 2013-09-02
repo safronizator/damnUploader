@@ -103,11 +103,15 @@
 
         // upload item object
         var UploadItem = function(file, completeCallback, progressCallback) {
-            this._id = uniq(5);
             this.file = file;
             this.replaceName = null;
             this.progressCallback = progressCallback;
             this.completeCallback = completeCallback;
+            this.xhr = null;
+            this.cancelled = false;
+            this.started = false;
+            this.completed = false;
+            this._id = uniq(5);
             this._post = [];
         };
         $.extend(UploadItem.prototype, {
@@ -123,6 +127,9 @@
                     return ;
                 }
                 this._post.push({"name" : fieldNameOrFieldsArray, "value" : value});
+            },
+            upload: function() {
+                $this._duUploadItem(this);
             },
             cancel: function() {
                 $this.duCancel(this._id);
@@ -149,7 +156,7 @@
         queue = $this.duQueue;
         set = $this._duSettings;
 
-
+        // private method for items ading
         $this._duAddItemsToQueue = function(item) {
             var addingEvent = $.Event("uploader.add");
             var limitEvent = $.Event("uploader.limit");
@@ -179,7 +186,11 @@
         };
 
         // private file-uploading method
-        $this._duUploadItem = function(url, item) {
+        $this._duUploadItem = function(item) {
+            if (item.started) {
+                return ;
+            }
+            item.started = true;
             if (!$.support.fileSending || !checkIsFile(item.file)) {
                 return false;
             }
@@ -195,7 +206,6 @@
                         prCall && item.progressCallback.call(item, Math.round(progress));
                     }
                 }, false);
-
                 xhr.upload.addEventListener("load", function(e) {
                     progress = 100;
                     uploaded = true;
@@ -207,7 +217,7 @@
             xhr.onreadystatechange = function() {
                 var callbackDefined = $.isFunction(item.completeCallback);
                 if (this.readyState == 4) {
-                    item.cancelled = item.cancelled || false;
+                    item.completed = true;
                     if (this.status < 400) {
                         if (!uploaded) {
                             callbackDefined && item.completeCallback.call(item, false, null, 0);
@@ -223,7 +233,7 @@
             };
 
             var filename = item.replaceName || item.file.name;
-            xhr.open("POST", url);
+            xhr.open("POST", set.url);
 
             // W3C (IE9, Chrome, Safari, Firefox 4+)
             var formData = new FormData();
@@ -284,7 +294,7 @@
                         $this.trigger('uploader.completed');
                     }
                 };
-                $this._duUploadItem(set.url, item);
+                $this._duUploadItem(item);
             });
             return $this;
         };
@@ -292,16 +302,7 @@
         // Dequeue upload item by it's id
         $this.duCancel = function(queueId) {
             if (queueId && $this.duItemsCount > 0) {
-                if (!$.support.fileSelecting) {
-                    var removingItem = $('#' + queueId);
-                    if (removingItem.length > 0) {
-                        removingItem.remove();
-                        $this.duItemsCount--;
-                    }
-                    return $this;
-                }
-
-                if (queue[queueId] !== undefined) {
+                if (isDefined(queue[queueId])) {
                     if (queue[queueId].xhr) {
                         queue[queueId].cancelled = true;
                         queue[queueId].xhr.abort();
