@@ -126,7 +126,7 @@
                 $progressBar.css('width', Math.round(percent) + '%');
             };
 
-            // To start uploads immediately as added
+            // To start uploading immediately as soon as added
             // ui.upload();
         };
 
