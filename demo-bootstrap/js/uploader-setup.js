@@ -6,15 +6,18 @@
         var $uploadForm = $('#upload-form');
         var $uploadRows = $('#upload-rows');
         var $clearBtn = $('#clear-btn');
+        var $canvasAddBtn = $('#canvas-add-btn');
+        var canvas = document.getElementById('canvas');
+        var $textAddBtn = $('#text-add-btn');
         var $previewsChecker = $('#previews-checker');
         var previewsOn = true;
 
         ///// Uploader init
         $fileInput.damnUploader({
-            // URL of server uploads handler
+            // URL of server-side upload handler
             url: './serverLogic.php',
             // File POST field name (for ex., it will be used as key in $_FILES array, if you using PHP)
-            fieldName:  'my-pic',
+            fieldName:  'my-file',
             // Container for handling drag&drops (not required)
             dropBox: $dropBox,
             // Limiting queued files count (if not defined - queue will be unlimited)
@@ -25,6 +28,15 @@
 
 
         ///// Misc funcs
+
+        var isTextFile = function(file) {
+            return file.type == 'text/plain';
+        };
+
+        var isImgFile = function(file) {
+            return file.type.match(/image.*/);
+        };
+
 
         // Creates queue table row with file information and upload status
         var createRowFromUploadItem = function(ui) {
@@ -39,14 +51,28 @@
                 var $statusCell =  $pbWrapper.parent();
                 $statusCell.empty().html('<i>cancelled</i>');
                 ui.cancel();
-                log(ui.file.name + ": " + "canceled");
+                log((ui.file.name || "[custom-data]") + " canceled");
             });
 
-            // Generating preview (note: it could work slow with large images)
-            var $preview = previewsOn ? $('<img/>').attr('width', 120) : $('<i>no preview</i>');
-            previewsOn && ui.readAs('DataURL', function(e) {
-                $preview.attr('src', e.target.result);
-            });
+            // Generating preview
+            var $preview;
+            if (previewsOn) {
+                if (isImgFile(ui.file)) {
+                    // image preview (note: might work slow with large images)
+                    $preview = $('<img/>').attr('width', 120);
+                    ui.readAs('DataURL', function(e) {
+                        $preview.attr('src', e.target.result);
+                    });
+                } else {
+                    // plain text preview
+                    $preview = $('<i/>');
+                    ui.readAs('Text', function(e) {
+                        $preview.text(e.target.result.substr(0, 15) + '...');
+                    });
+                }
+            } else {
+                $preview = $('<i>no preview</i>');
+            }
 
             // Appending cells to row
             $('<td/>').append($preview).appendTo($row); // Preview
@@ -60,20 +86,22 @@
         // File adding handler
         var fileAddHandler = function(e) {
             // e.uploadItem represents uploader task as special object,
-            // where we can define complete & progress callbacks as well as some another parameters
+            // that allows us to define complete & progress callbacks as well as some another parameters
             // for every single upload
             var ui = e.uploadItem;
-            var filename = ui.file.name;
+            var filename = ui.file.name || ""; // Filename property may be absent when adding custom data
 
             // We can call preventDefault() method of event to cancel adding
-            if (!ui.file.type.match(/image.*/)) {
-                log(filename + ": is not image. Only images accepted!");
+            if (!isTextFile(ui.file) && !isImgFile(ui.file)) {
+                log(filename + ": is not image. Only images & plain text files accepted!");
                 e.preventDefault();
                 return ;
             }
 
             // We can replace original filename if needed
-            if (filename.length > 14) {
+            if (!filename.length) {
+                ui.replaceName = "custom-data";
+            } else if (filename.length > 14) {
                 ui.replaceName = filename.substr(0, 10) + "_" + filename.substr(filename.lastIndexOf('.'));
             }
 
@@ -85,7 +113,7 @@
             var $progressBar = createRowFromUploadItem(ui);
             ui.completeCallback = function(success, data, errorCode) {
                 log('******');
-                log(this.file.name + " completed");
+                log((this.file.name || "[custom-data]") + " completed");
                 if (success) {
                     log('recieved data:', data);
                 } else {
@@ -118,7 +146,7 @@
 
         // Clear button
         $clearBtn.on('click', function() {
-            $fileInput.uploaderCancelAll();
+            $fileInput.duCancelAll();
             $uploadRows.empty();
             log('******');
             log("All uploads canceled :(");
@@ -129,10 +157,20 @@
             previewsOn = $previewsChecker.prop('checked');
         });
 
+        // Adding from canvas
+        $canvasAddBtn.on('click', function() {
+            $fileInput.duEnqueue(canvas.toDataURL('image/png'));
+        });
+
+        // Adding from textarea
+        $textAddBtn.on('click', function() {
+            $fileInput.duEnqueue($('#text-to-send').val());
+        });
+
         // Form submit
         $uploadForm.on('submit', function(e) {
             e.preventDefault();
-            $fileInput.uploaderStart();
+            $fileInput.duStart();
         });
 
     });
@@ -142,7 +180,7 @@
 
 // File API support info
 if(!$.support.fileSelecting) {
-    log("[-] Your browser doesn't support File API (uploads could be performed only by default form sending)");
+    log("[-] Your browser doesn't support File API (uploads may be performed only by default form sending)");
 } else {
     log("[√] Your browser supports multiple file selecting" + ($.support.fileSending ? " and sending" : ""));
     if(!$.support.fileReading) {
