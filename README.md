@@ -29,7 +29,7 @@ var $fileInput = $('#file-input').damnUploader({
     url: '/ajax-file-upload-handler'
 });
 ```
-... and call to duStart() method in some event handler (for ex., when form is submitted):
+... and call duStart() method in some event handler (for ex., when form is submitted):
 ```javascript
 $('#file-form').submit(function(e) {
     $fileInput.duStart();
