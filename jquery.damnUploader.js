@@ -100,6 +100,7 @@
         // upload item object
         var UploadItem = function(file, completeCallback, progressCallback) {
             this.file = file;
+            this.fieldName = null;
             this.replaceName = null;
             this.progressCallback = progressCallback;
             this.completeCallback = completeCallback;
@@ -184,13 +185,13 @@
 
         // private file-uploading method
         $this._duUploadItem = function(item) {
+            if (!$.support.fileSending || !checkIsFile(item.file)) {
+                return false;
+            }
             if (item.started) {
                 return ;
             }
             item.started = true;
-            if (!$.support.fileSending || !checkIsFile(item.file)) {
-                return false;
-            }
             var xhr = new XMLHttpRequest();
             var progress = 0;
             var uploaded = false;
@@ -234,7 +235,7 @@
 
             // W3C (IE9, Chrome, Safari, Firefox 4+)
             var formData = new FormData();
-            formData.append((item.fieldName || 'file'), item.file, filename);
+            formData.append((item.fieldName || set.fieldName || 'file'), item.file, filename);
             if (item._post.length > 0) {
                 $.each(item._post, function(i, field) {
                     formData.append(field.name, field.value);
@@ -278,7 +279,6 @@
             }
             $.each(queue, function(queueId, item) {
                 var compl = item.completeCallback;
-                item.fieldName = item.fieldName || set.fieldName;
                 item.completeCallback = function(successful, data, error) {
                     if (!this.cancelled) {
                         delete queue[queueId];
