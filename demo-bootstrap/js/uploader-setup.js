@@ -187,8 +187,11 @@
 
         // Form submit
         $uploadForm.on('submit', function(e) {
-            e.preventDefault();
-            $fileInput.duStart();
+            // Sending files by HTML5 File API if available, else - form will be submitted on fallback handler
+            if ($.support.fileSending) {
+                e.preventDefault();
+                $fileInput.duStart();
+            }
         });
 
     });
@@ -198,7 +201,7 @@
 
 // File API support info
 if(!$.support.fileSelecting) {
-    log("[-] Your browser doesn't support File API (uploads may be performed only by default form sending)");
+    log("[-] Your browser doesn't support File API (uploads may be performed only by default form submitting)");
 } else {
     log("[√] Your browser supports multiple file selecting" + ($.support.fileSending ? " and sending" : ""));
     if(!$.support.fileReading) {
@@ -208,7 +211,7 @@ if(!$.support.fileSelecting) {
         log("[-] Your browser can't retrieve upload progress information (progress bars will be disabled)");
     }
     if(!$.support.fileSending) {
-        log("[-] Your browser doesn't support FormData object (files will be send with manually formed requests)");
+        log("[-] Your browser doesn't support FormData object (files will be send by default form submitting)");
     }
     log("Now select some files to see what happen ...");
 }

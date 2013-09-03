@@ -47,10 +47,10 @@
                 <!-- Filesystem tab -->
                 <div class="tab-pane active" id="filesystem-tab">
                     <div class="well well-lg auto-tip" id="drop-box" data-title="... or just drop it here" data-placement="bottom">
-                        <form class="form-inline" role="form" id="upload-form" method="post" enctype="multipart/form-data">
+                        <form class="form-inline" role="form" id="upload-form" method="post" action="./serverLogic.fallback.php" enctype="multipart/form-data">
                             <input type="hidden" name="test-value-from-form" value="test" />
                             <div class="form-group">
-                                <input type="file" class="form-control auto-tip" id="file-input" data-title="You can select one or more files by system menu" />
+                                <input type="file" class="form-control auto-tip" id="file-input" name="my-file" data-title="You can select one or more files by system menu" />
                             </div>
                             <div class="checkbox">
                                 <label>
