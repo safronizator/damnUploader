@@ -6,9 +6,12 @@
         var $uploadForm = $('#upload-form');
         var $uploadRows = $('#upload-rows');
         var $clearBtn = $('#clear-btn');
+        var $sendBtn = $('#send-btn');
         var $canvasAddBtn = $('#canvas-add-btn');
         var canvas = document.getElementById('canvas');
         var $textAddBtn = $('#text-add-btn');
+        var $autostartChecker = $('#autostart-checker');
+        var autostartOn = false;
         var $previewsChecker = $('#previews-checker');
         var previewsOn = true;
 
@@ -20,7 +23,7 @@
             fieldName:  'my-file',
             // Container for handling drag&drops (not required)
             dropBox: $dropBox,
-            // Limiting queued files count (if not defined - queue will be unlimited)
+            // Limiting queued files count (if not defined [or false] - queue will be unlimited)
             limit: 5,
             // Expected response type ('text' or 'json')
             dataType: 'json'
@@ -127,7 +130,7 @@
             };
 
             // To start uploading immediately as soon as added
-            // ui.upload();
+            autostartOn && ui.upload();
         };
 
 
@@ -158,6 +161,18 @@
         // Previews generating switcher
         $previewsChecker.on('change', function() {
             previewsOn = $previewsChecker.prop('checked');
+        });
+
+        // Autostart switcher
+        $autostartChecker.on('change', function() {
+            autostartOn = $autostartChecker.prop('checked');
+            $sendBtn.prop('disabled', autostartOn);
+            $fileInput.duOption('limit', autostartOn ? false : 5);
+            if (autostartOn) {
+
+            } else {
+
+            }
         });
 
         // Adding from canvas
