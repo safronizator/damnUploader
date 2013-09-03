@@ -2,8 +2,13 @@ damnUploader
 ============
 
 jQuery file upload plugin. Simplifies AJAX files uploading and client-side file management routines.
-Works through HTML 5 File API in modern browsers. Has built-in feature detection,
-that gives ability to realize graceful degradation in older browsers.
+
+### Features:
+
+* works through HTML5 File API in modern browsers
+* has built-in feature detection, that gives ability to realize graceful degradation in older browsers
+* drag & drop
+* multiple files selecting
 
 
 Demo
@@ -37,3 +42,34 @@ To explore a wider range of possibilities, see API description and demo.
 
 API
 ---
+### Methods | @todo: descriptions
+
+** duStart() **
+
+** duCancel(queueId) **
+
+** duCancelAll() **
+
+** duEnqueue() **
+
+** duCount() **
+
+** duOption() **
+
+** duNewUploadItem() **
+
+
+### Events | @todo: descriptions
+
+Events handlers may be attached by jQuery event API methods:
+```javascript
+$fileInput.on('uploader.limit', function() { alert('Uploads limit exceeded!'); });
+```
+
+** uploader.add **
+
+** uploader.limit **
+
+** uploader.completed **
+
+
