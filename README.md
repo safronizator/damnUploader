@@ -9,6 +9,8 @@ jQuery file upload plugin. Simplifies AJAX files uploading and client-side file 
 * has built-in feature detection, that gives ability to realize graceful degradation in older browsers
 * drag & drop
 * multiple files selecting
+* file reading
+* creating uploads from custom data
 
 
 Demo
