@@ -44,19 +44,19 @@ API
 ---
 ### Methods | @todo: descriptions
 
-** duStart() **
+**duStart()**
 
-** duCancel(queueId) **
+**duCancel(queueId)**
 
-** duCancelAll() **
+**duCancelAll()**
 
-** duEnqueue() **
+**duEnqueue(item)**
 
-** duCount() **
+**duCount()**
 
-** duOption() **
+**duOption(name, value)**
 
-** duNewUploadItem() **
+**duNewUploadItem(fileOrData)**
 
 
 ### Events | @todo: descriptions
@@ -68,8 +68,8 @@ $fileInput.on('uploader.limit', function() { alert('Uploads limit exceeded!'); }
 
 **uploader.add**
 
-** uploader.limit **
+**uploader.limit**
 
-** uploader.completed **
+**uploader.completed**
 
 
