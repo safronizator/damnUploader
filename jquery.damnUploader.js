@@ -83,10 +83,6 @@
         // context
         var $this = this;
 
-        // locals
-        var queue = $this.duQueue;
-        var set = $this._duSettings || {};
-
         ////////////////////////////////////////////////////////////////////////
         // initialization
 
@@ -149,19 +145,20 @@
             }
         });
 
-
         // private properties
-        $this.duQueue = {};
-        $this.duItemsCount = 0;
-        queue = $this.duQueue;
-        set = $this._duSettings;
+        $this._duQueue = {};
+        $this._duItemsCount = 0;
+
+        // locals
+        var queue = $this._duQueue;
+        var set = $this._duSettings;
 
         // private method for items ading
         $this._duAddItemsToQueue = function(item) {
             var addingEvent = $.Event("uploader.add");
             var limitEvent = $.Event("uploader.limit");
             var ui;
-            if ($this.duItemsCount === set.limit) {
+            if ($this._duItemsCount === set.limit) {
                 $this.trigger(limitEvent);
                 return false;
             }
@@ -180,7 +177,7 @@
                 return false;
             }
             var queueId = ui.id();
-            $this.duItemsCount++;
+            $this._duItemsCount++;
             queue[queueId] = ui;
             return ui;
         };
@@ -285,12 +282,12 @@
                 item.completeCallback = function(successful, data, error) {
                     if (!this.cancelled) {
                         delete queue[queueId];
-                        $this.duItemsCount--;
+                        $this._duItemsCount--;
                     }
                     if ($.isFunction(compl)) {
                         compl.call(this, successful, data, error);
                     }
-                    if ($this.duItemsCount == 0) {
+                    if ($this._duItemsCount == 0) {
                         $this.trigger('uploader.completed');
                     }
                 };
@@ -301,14 +298,14 @@
 
         // Dequeue upload item by it's id
         $this.duCancel = function(queueId) {
-            if (queueId && $this.duItemsCount > 0) {
+            if (queueId && $this._duItemsCount > 0) {
                 if (isDefined(queue[queueId])) {
                     if (queue[queueId].xhr) {
                         queue[queueId].cancelled = true;
                         queue[queueId].xhr.abort();
                     }
                     delete queue[queueId];
-                    $this.duItemsCount--;
+                    $this._duItemsCount--;
                 }
             }
             return $this;
@@ -342,21 +339,20 @@
 
         // Returns queued items count
         $this.duCount = function() {
-            return $this.duItemsCount;
+            return $this._duItemsCount;
         };
 
-        // Change plugin option (url, mutliple, fieldName, limit are changeable) or get it value by name
+        // Change plugin option (url, mutliple, fieldName, limit, dataType are changeable), or get it value by name
         $this.duOption = function(name, value) {
-            var acceptParams = ['url', 'multiple', 'fieldName', 'limit'];
-            if (value === undefined) {
-                return $this._duSettings[name];
-            }
+            var acceptParams = ['url', 'multiple', 'fieldName', 'limit', 'dataType'];
             if ($.isPlainObject(name)) {
                 $.each(name, function(key, val) {
                     $this.duOption(key, val);
                 });
+            } else if (value === undefined) {
+                return $this._duSettings[name];
             } else {
-                $.inArray(name, acceptParams) && ($this._duSettings[key] = value);
+                $.inArray(name, acceptParams) && ($this._duSettings[name] = value);
             }
             return $this;
         };
