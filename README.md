@@ -65,13 +65,13 @@ API
 
 Events handlers may be attached by jQuery event API methods:
 ```javascript
-$fileInput.on('uploader.limit', function() { alert('Uploads limit exceeded!'); });
+$fileInput.on('du.limit', function() { alert('Uploads limit exceeded!'); });
 ```
 
-**uploader.add**
+**du.add**
 
-**uploader.limit**
+**du.limit**
 
-**uploader.completed**
+**du.completed**
 
 

@@ -156,8 +156,8 @@
 
         // private method for items ading
         $this._duAddItemsToQueue = function(item) {
-            var addingEvent = $.Event("uploader.add");
-            var limitEvent = $.Event("uploader.limit");
+            var addingEvent = $.Event("du.add");
+            var limitEvent = $.Event("du.limit");
             var ui;
             if ($this._duItemsCount === set.limit) {
                 $this.trigger(limitEvent);
@@ -288,7 +288,7 @@
                         compl.call(this, successful, data, error);
                     }
                     if ($this._duItemsCount == 0) {
-                        $this.trigger('uploader.completed');
+                        $this.trigger('du.completed');
                     }
                 };
                 $this._duUploadItem(item);

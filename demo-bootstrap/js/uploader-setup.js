@@ -138,13 +138,13 @@
 
         // Uploader events
         $fileInput.on({
-            'uploader.add' : fileAddHandler,
+            'du.add' : fileAddHandler,
 
-            'uploader.limit' : function() {
+            'du.limit' : function() {
                 log("File upload limit exceeded!");
             },
 
-            'uploader.completed' : function() {
+            'du.completed' : function() {
                 log('******');
                 log("All uploads completed!");
             }
