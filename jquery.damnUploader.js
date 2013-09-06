@@ -108,7 +108,7 @@
             this.cancelled = false;
             this.started = false;
             this.completed = false;
-            this._id = uniq(5);
+            this._id = uniq(7);
             this._post = [];
         };
         $.extend(UploadItem.prototype, {
