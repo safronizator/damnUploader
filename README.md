@@ -54,6 +54,8 @@ API
 
 **duEnqueue(item)**
 
+**duGetQueue(item)**
+
 **duCount()**
 
 **duOption(name, value)**

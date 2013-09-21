@@ -337,6 +337,11 @@
             return $this._duAddItemsToQueue(item);
         };
 
+        // Returns all upload queue
+        $this.duGetQueue = function() {
+            return $this._duQueue;
+        };        
+
         // Returns queued items count
         $this.duCount = function() {
             return $this._duItemsCount;
