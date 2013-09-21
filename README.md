@@ -44,24 +44,44 @@ To explore a wider range of possibilities, see API description and demo.
 
 API
 ---
-### Methods | @todo: descriptions
+### Methods
 
-**duStart()**
+**duStart()** - Start queued files uploading
 
-**duCancel(queueId)**
+If you prefer start upload immediately after file added, you doesn't need to call this method, 
+you can call UploadItem.start() instead (see desc. below), for example, when 'du.add' event fired.
 
-**duCancelAll()**
+**duCancel(queueId)** - Cancel upload by it id
 
-**duEnqueue(item)**
+We recommend to use UploadItem.cancel() method instead (see desc. below)
 
-**duGetQueue(item)**
+**duCancelAll()** - Cancel all queued files uploading and clear queue. Active uploads will be canceled too
 
-**duCount()**
+**duEnqueue(item)** - Adds some data (it may not be a File object necessarily, see duNewUploadItem() method desc.)
+to upload queue
 
-**duOption(name, value)**
+Use this method, if you want to add custom data to upload as file. 
+Method can interpret not only File or File-compatible objects. 
+In case of given argument is not File-compatible, will attempt to convert it 
+into such, according to the rules described in duNewUploadItem() method description (see below).
 
-**duNewUploadItem(fileOrData)**
+**duGetQueue(item)** - Returns all queued items in hash like {uploadID: uploadItemObject}
 
+**duCount()** - Returns count of queued items
+
+**duOption(name, value)** - Change some option value
+
+'url', 'mutliple', 'fieldName', 'limit', 'dataType' are changeable
+
+**duNewUploadItem(fileOrData)** - Creates UploadItem object from some data, according to the following rules:
+
+* if arg is already instance of UploadItem, it will be returned as is
+* if arg is File-compatible object (window.File and window.Blob are), creates UploadItem with data & type contained inside it
+* if arg is dataURI, parses it and creates UploadItem with defined data & type
+* in other cases tries to call toString() method and create blob with type 'text/plain', then creates UploadItem from it
+
+UploadItem object, created by this method may be customized and then added to upload queue or uploaded instantly by
+calling it upload() method. duGetQueue() calls this method() independently, if needed.
 
 ### Events | @todo: descriptions
 
