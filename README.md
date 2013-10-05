@@ -44,6 +44,23 @@ To explore a wider range of possibilities, see API description and demo.
 
 API
 ---
+### Init parameters
+
+**url**: URL for uploading (defult: '/upload.php')
+
+**multiple**: allows to select several files (default: true)
+
+**fieldName**: sets file field name. For ex., it will used as index in $_FILES when upload handled by PHP. (default: 'file')
+
+**dropping**: switch on drag&drop functionality (default: true)
+
+**dropBox**: container for drag&drop. You may pass selector or jQuery chained object (default: false)
+
+**limit**: used to limit count of files to put in queue (default: false, means no limit)
+
+**dataType**: expected response type, 'text' or 'json' (default: 'text')
+
+
 ### Methods
 
 **duStart()** - Start queued files uploading
@@ -81,19 +98,101 @@ into such, according to the rules described in duNewUploadItem() method descript
 * in other cases tries to call toString() method and create blob with type 'text/plain', then creates UploadItem from it
 
 UploadItem object, created by this method may be customized and then added to upload queue or uploaded instantly by
-calling it upload() method. duGetQueue() calls this method() independently, if needed.
+calling it upload() method. duEnqueue() calls this method independently, if needed.
 
-### Events | @todo: descriptions
+
+### Events
 
 Events handlers may be attached by jQuery event API methods:
 ```javascript
-$fileInput.on('du.limit', function() { alert('Uploads limit exceeded!'); });
+$fileInput.on('du.add', function(e) { console.log('File added: ' + e.uploadItem.file.name); });
 ```
 
-**du.add**
+**du.add** - fired when file selected
 
-**du.limit**
+In case of multiple files were selected, triggers separately for each file. UploadItem object can be accessed from
+event object (it has property uploadItem). You can reject file by calling event.preventDefault(). If you want to
+start uploads immediately, you could cancel default action (enqueueing file) by event.preventDefault() and start
+upload by calling event.uploadItem.upload()
 
-**du.completed**
+**du.limit** - fired when count of files exceeded defined limit, but user tries to add more files
+
+**du.completed** - fired once when all uploads completed
+
+Every UploadItem object has own complete callback (see UploadItem desc.)
 
 
+### UploadItem object
+
+Special object, that represents single item to upload (it may not necessarily be a real file).
+
+**Fields**:
+
+**file** - contains window.File object if assigned
+
+**fieldName** - upload field name
+
+**replaceName** - name to replace original file name
+
+**progressCallback** - function to call on upload progress is updated. Current progress state (in percents) passed as argument
+
+**this.completeCallback** - function to call when upload completed. Passed arguments: successFlag, recievedData, httpStatusCode.
+Example: 
+```javascript
+$fileInput.on('du.add', function(e) {
+    console.log('File added: ' + e.uploadItem.file.name);
+    e.uploadItem.completeCallback = function(succ, data, status) {
+        console.log(this.file.name + " was uploaded. Recieved data: ", data)
+    };
+});
+```
+
+
+**Methods**:
+
+**id()** - returns unique item id
+
+**addPostData(name, value)** - adds some data to post with upload
+
+**upload()** - start upload. You not need to call this method when duStart() method is used
+
+**cancel()** - cancel upload and remove item from queue
+
+**readAs(format, callback)** - read file as defined format and pass data to callback. Possible formats are: 
+'Text', 'DataURL', 'BinaryString', 'ArrayBuffer'. Example:
+```javascript
+e.uploadItem.readAs('Text', function(data) {
+    console.log("file contents:", data);
+});
+```
+
+
+### Feature detection
+
+Plugin adds several flags to **$.support** object:
+
+**fileSelecting** - *false* if there's no way to handle file selection, and thus to control uploading
+
+**fileReading** - *false* if there's no possibility to read files (method readAs() will always return null)
+
+**uploadControl** - *false* if can't retrieve progress data. UploadItem's progressCallback will be called once with value of 100%
+
+**fileSending** - *false* if browser doesn't support file API
+
+Example:
+```javascript
+$('#form-with-files').submit(function(e) {
+    if ($.support.fileSending) {
+        // if browser support, start uploading by plugin
+        $fileInput.duStart();
+        e.preventDefault();
+    }
+    // else - form will be sended on default handler, defined in it's "action" attribute
+});
+```
+
+
+Browser support
+---------------
+
+Supported in all modern browsers that supports file API. See details at [caniuse.com](http://caniuse.com/#feat=fileapi).
