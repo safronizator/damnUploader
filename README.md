@@ -16,7 +16,8 @@ jQuery file upload plugin. Simplifies AJAX files uploading and client-side file 
 Demo
 ----
 
-Complex, well commented demo available in [./demo-bootstrap](./demo-bootstrap/). (@todo: online example).
+Complex, well commented demo available in [./demo-bootstrap](./demo-bootstrap/). 
+Also, you can [view it online](http://safron.su/playground/damnUploader/demo-bootstrap/).
 It based on twitter bootstrap and contains examples for all most useful cases.
 
 
