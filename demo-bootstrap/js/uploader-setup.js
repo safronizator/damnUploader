@@ -168,11 +168,6 @@
             autostartOn = $autostartChecker.prop('checked');
             $sendBtn.prop('disabled', autostartOn);
             $fileInput.duOption('limit', autostartOn ? false : 5);
-            if (autostartOn) {
-
-            } else {
-
-            }
         });
 
         // Adding from canvas
