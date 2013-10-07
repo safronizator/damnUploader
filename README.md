@@ -47,19 +47,19 @@ API
 ---
 ### Init parameters
 
-**url**: URL for uploading (defult: '/upload.php')
+**url**: URL to upload (default: **'/upload.php'**). Every upload will be performed in a separate request.
 
-**multiple**: allows to select several files (default: true)
+**multiple**: allows to select several files (default: **true**)
 
-**fieldName**: sets file field name. For ex., it will used as index in $_FILES when upload handled by PHP. (default: 'file')
+**fieldName**: sets file field name. For ex., it will be used as index in $_FILES when upload handled by PHP. (default: **'file'**)
 
-**dropping**: switch on drag&drop functionality (default: true)
+**dropping**: switch on drag&drop functionality (default: **true**)
 
-**dropBox**: container for drag&drop. You may pass selector or jQuery chained object (default: false)
+**dropBox**: container for drag&drop. You may pass selector or jQuery chained object (default: **false**)
 
-**limit**: used to limit count of files to put in queue (default: false, means no limit)
+**limit**: used to limit count of files to put in queue (default: **false**, means no limit)
 
-**dataType**: expected response type, 'text' or 'json' (default: 'text')
+**dataType**: expected response type, 'text' or 'json' (default: **'text'**)
 
 
 ### Methods
@@ -109,7 +109,7 @@ Events handlers may be attached by jQuery event API methods:
 $fileInput.on('du.add', function(e) { console.log('File added: ' + e.uploadItem.file.name); });
 ```
 
-**du.add** - fired when file selected
+**du.add** - fired when file is selected
 
 In case of multiple files were selected, triggers separately for each file. UploadItem object can be accessed from
 event object (it has property uploadItem). You can reject file by calling event.preventDefault(). If you want to
