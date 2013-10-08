@@ -137,7 +137,7 @@ Special object, that represents single item to upload (it may not necessarily be
 
 **progressCallback** - function to call on upload progress is updated. Current progress state (in percents) passed as argument
 
-**this.completeCallback** - function to call when upload completed. Passed arguments: successFlag, recievedData, httpStatusCode.
+**completeCallback** - function to call when upload completed. Passed arguments: successFlag, recievedData, httpStatusCode.
 Example: 
 ```javascript
 $fileInput.on('du.add', function(e) {
