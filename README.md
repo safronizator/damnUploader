@@ -184,7 +184,7 @@ Example:
 ```javascript
 $('#form-with-files').submit(function(e) {
     if ($.support.fileSending) {
-        // if browser support, start uploading by plugin
+        // if browser supports, start uploading by plugin
         $fileInput.duStart();
         e.preventDefault();
     }
