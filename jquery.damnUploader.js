@@ -315,7 +315,8 @@
 
         // Cancel all uploads & clear queue
         $this.duCancelAll = function() {
-            $.each(queue, function(key, item) {
+            isFileField && $this.val('');
+            $.each(queue, function(key, _) {
                 $this.duCancel(key);
             });
             return $this;
