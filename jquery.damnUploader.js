@@ -97,6 +97,8 @@
             dataType: 'text'
         }, params || {});
 
+        !$this._duSettings.multiple && ($this._duSettings.limit = 1);
+
         // upload item object
         var UploadItem = function(file, completeCallback, progressCallback) {
             this.file = file;
@@ -251,7 +253,7 @@
         var isFileField = (($this.get(0).tagName == 'INPUT') && (this.attr('type') == 'file'));
 
         if (isFileField) {
-            $this.prop('multiple', true).on('change', function() {
+            $this.prop('multiple', set.multiple).on('change', function() {
                 $this._duAddItemsToQueue(this.files);
             });
         }
@@ -340,16 +342,16 @@
         // Returns all upload queue
         $this.duGetQueue = function() {
             return $this._duQueue;
-        };        
+        };
 
         // Returns queued items count
         $this.duCount = function() {
             return $this._duItemsCount;
         };
 
-        // Change plugin option (url, mutliple, fieldName, limit, dataType are changeable), or get it value by name
+        // Change plugin option (url, fieldName, limit, dataType are changeable), or get it value by name
         $this.duOption = function(name, value) {
-            var acceptParams = ['url', 'multiple', 'fieldName', 'limit', 'dataType'];
+            var acceptParams = ['url', 'fieldName', 'limit', 'dataType'];
             if ($.isPlainObject(name)) {
                 $.each(name, function(key, val) {
                     $this.duOption(key, val);

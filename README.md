@@ -16,7 +16,7 @@ jQuery file upload plugin. Simplifies AJAX files uploading and client-side file 
 Demo
 ----
 
-Complex, well commented demo available in [./demo-bootstrap](./demo-bootstrap/). 
+Complex, well commented demo available in [./demo-bootstrap](./demo-bootstrap/).
 Also, you can [view it online](http://safron.su/playground/damnUploader/demo-bootstrap/).
 It based on twitter bootstrap and contains examples for all most useful cases.
 
@@ -66,7 +66,7 @@ API
 
 **duStart()** - Start queued files uploading
 
-If you prefer start upload immediately after file added, you doesn't need to call this method, 
+If you prefer start upload immediately after file added, you doesn't need to call this method,
 you can call UploadItem.start() instead (see desc. below), for example, when 'du.add' event fired.
 
 **duCancel(queueId)** - Cancel upload by it id
@@ -78,9 +78,9 @@ We recommend to use UploadItem.cancel() method instead (see desc. below)
 **duEnqueue(item)** - Adds some data (it may not be a File object necessarily, see duNewUploadItem() method desc.)
 to upload queue
 
-Use this method, if you want to add custom data to upload as file. 
-Method can interpret not only File or File-compatible objects. 
-In case of given argument is not File-compatible, will attempt to convert it 
+Use this method, if you want to add custom data to upload as file.
+Method can interpret not only File or File-compatible objects.
+In case of given argument is not File-compatible, will attempt to convert it
 into such, according to the rules described in duNewUploadItem() method description (see below).
 
 **duGetQueue(item)** - Returns all queued items in hash like {uploadID: uploadItemObject}
@@ -89,7 +89,7 @@ into such, according to the rules described in duNewUploadItem() method descript
 
 **duOption(name, value)** - Change some option value
 
-'url', 'mutliple', 'fieldName', 'limit', 'dataType' are changeable
+'url', 'fieldName', 'limit', 'dataType' are changeable
 
 **duNewUploadItem(fileOrData)** - Creates UploadItem object from some data, according to the following rules:
 
@@ -138,7 +138,7 @@ Special object, that represents single item to upload (it may not necessarily be
 **progressCallback** - function to call on upload progress is updated. Current progress state (in percents) passed as argument
 
 **completeCallback** - function to call when upload completed. Passed arguments: successFlag, recievedData, httpStatusCode.
-Example: 
+Example:
 ```javascript
 $fileInput.on('du.add', function(e) {
     console.log('File added: ' + e.uploadItem.file.name);
@@ -159,7 +159,7 @@ $fileInput.on('du.add', function(e) {
 
 **cancel()** - cancel upload and remove item from queue
 
-**readAs(format, callback)** - read file as defined format and pass data to callback. Possible formats are: 
+**readAs(format, callback)** - read file as defined format and pass data to callback. Possible formats are:
 'Text', 'DataURL', 'BinaryString', 'ArrayBuffer'. Example:
 ```javascript
 e.uploadItem.readAs('Text', function(data) {
