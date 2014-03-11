@@ -359,8 +359,8 @@
                 });
             } else if (value === undefined) {
                 return $this._duSettings[name];
-            } else {
-                $.inArray(name, acceptParams) && ($this._duSettings[name] = value);
+            } else if ($.inArray(name, acceptParams) > -1) {
+                $this._duSettings[name] = value;
             }
             return $this;
         };
