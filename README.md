@@ -83,7 +83,7 @@ Method can interpret not only File or File-compatible objects.
 In case of given argument is not File-compatible, will attempt to convert it
 into such, according to the rules described in duNewUploadItem() method description (see below).
 
-**duGetQueue(item)** - Returns all queued items in hash like {uploadID: uploadItemObject}
+**duGetQueue()** - Returns all queued items in hash like {uploadID: uploadItemObject}
 
 **duCount()** - Returns count of queued items
 
