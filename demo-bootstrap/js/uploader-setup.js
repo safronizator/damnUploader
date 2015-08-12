@@ -14,6 +14,7 @@
         var autostartOn = false;
         var $previewsChecker = $('#previews-checker');
         var previewsOn = true;
+        var $methodSelect = $('input[name="method"]');
 
         ///// Uploader init
         $fileInput.damnUploader({
@@ -168,6 +169,11 @@
             autostartOn = $autostartChecker.prop('checked');
             $sendBtn.prop('disabled', autostartOn);
             $fileInput.duOption('limit', autostartOn ? false : 5);
+        });
+
+        // Method select
+        $methodSelect.on('change', function() {
+            $fileInput.duOption('method', $methodSelect.filter(':checked').val());
         });
 
         // Adding from canvas
