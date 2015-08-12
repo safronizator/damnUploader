@@ -9,6 +9,7 @@ jQuery file upload plugin. Simplifies AJAX files uploading and client-side file 
 * has built-in feature detection, that gives ability to realize graceful degradation in older browsers
 * drag & drop
 * multiple files selecting
+* base MIME type checking
 * file reading
 * creating uploads from custom data
 
@@ -61,6 +62,10 @@ API
 
 **dataType**: expected response type, 'text' or 'json' (default: **'text'**)
 
+**method**: HTTP method, 'POST' or 'PUT' (default: **'POST'**)
+
+**acceptType**: MIME type to accept (for example: 'image/*' or 'image/png'; default: **null** - accept all)
+
 
 ### Methods
 
@@ -89,7 +94,7 @@ into such, according to the rules described in duNewUploadItem() method descript
 
 **duOption(name, value)** - Change some option value
 
-'url', 'fieldName', 'limit', 'dataType' are changeable
+'url', 'fieldName', 'limit', 'dataType', 'method' are changeable
 
 **duNewUploadItem(fileOrData)** - Creates UploadItem object from some data, according to the following rules:
 
@@ -100,6 +105,8 @@ into such, according to the rules described in duNewUploadItem() method descript
 
 UploadItem object, created by this method may be customized and then added to upload queue or uploaded instantly by
 calling it upload() method. duEnqueue() calls this method independently, if needed.
+
+**duIsAcceptedType(mime)** - Check that passed MIME type string matches defined in 'acceptType' property
 
 
 ### Events
@@ -153,7 +160,14 @@ $fileInput.on('du.add', function(e) {
 
 **id()** - returns unique item id
 
-**addPostData(name, value)** - adds some data to post with upload
+**addPostData(data)** - adds some data to post with upload (multiple fields as plain object)
+```javascript
+e.uploadItem.addPostData({ hello: 'world' });
+```
+**addPostData(name, value)** - adds some data to post with upload (single field)
+```javascript
+e.uploadItem.addPostData('hello', 'world');
+```
 
 **upload()** - start upload. You not need to call this method when duStart() method is used
 
