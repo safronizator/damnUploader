@@ -68,6 +68,16 @@
         return makeBlob(data, mimeString);
     };
 
+    // MIME match testing function
+    var checkMimeMatched = function(mime, accepted) {
+        var mimeChunks = mime.split('/');
+        var acceptedChunks = accepted.split('/');
+        if (mimeChunks[0] != acceptedChunks[0]) {
+            return false;
+        }
+        return (acceptedChunks[1] == '*') || (mimeChunks[1] == acceptedChunks[1]);
+    };
+
     ////////////////////////////////////////////////////////////////////////////
     // plugin code
     $.fn.damnUploader = function(params) {
@@ -95,7 +105,8 @@
             dropBox: false,
             limit: false,
             dataType: 'text',
-            method: 'POST'
+            method: 'POST',
+            acceptType: null
         }, params || {});
 
         !$this._duSettings.multiple && ($this._duSettings.limit = 1);
@@ -255,12 +266,17 @@
         var isFileField = (($this.get(0).tagName == 'INPUT') && (this.attr('type') == 'file'));
 
         if (isFileField) {
+            // Setup file dialog properties
             $this.prop('multiple', set.multiple).on('change', function() {
                 $this._duAddItemsToQueue(this.files);
             });
+            if (set.acceptType !== null) {
+                $this.attr('accept', set.acceptType);
+            }
         }
 
         if (set.dropping) {
+            // Setup drag&drop handlers
             //TODO: need to review
             $this.on('drop',  function(e) {
                 $this._duAddItemsToQueue(e.originalEvent.dataTransfer.files);
@@ -271,6 +287,19 @@
                 return false;
             });
         }
+
+        $this.on('du.add', function(e) {
+            // Checking MIME type
+            if (set.acceptType === null) {
+                return;
+            }
+            if (e.uploadItem.file) {
+                if (!checkMimeMatched(e.uploadItem.file.type, set.acceptType)) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                }
+            }
+        });
 
 
         ////////////////////////////////////////////////////////////////////////
@@ -365,6 +394,11 @@
                 $this._duSettings[name] = value;
             }
             return $this;
+        };
+
+        // Check MIME type string for matching acceptType option
+        $this.duIsAcceptedType = function(mime) {
+            return (set.acceptType === null) || checkMimeMatched(mime, set.acceptType);
         };
 
         return $this;
