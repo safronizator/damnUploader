@@ -94,7 +94,8 @@
             dropping: true,
             dropBox: false,
             limit: false,
-            dataType: 'text'
+            dataType: 'text',
+            method: 'POST'
         }, params || {});
 
         !$this._duSettings.multiple && ($this._duSettings.limit = 1);
@@ -233,7 +234,8 @@
             };
 
             var filename = item.replaceName || item.file.name;
-            xhr.open("POST", set.url);
+            var method = (set.method.toString().toUpperCase() == 'PUT') ? 'PUT' : 'POST';
+            xhr.open(method, set.url);
 
             // W3C (IE9, Chrome, Safari, Firefox 4+)
             var formData = new FormData();
@@ -352,7 +354,7 @@
 
         // Change plugin option (url, fieldName, limit, dataType are changeable), or get it value by name
         $this.duOption = function(name, value) {
-            var acceptParams = ['url', 'fieldName', 'limit', 'dataType'];
+            var acceptParams = ['url', 'fieldName', 'limit', 'dataType', 'method'];
             if ($.isPlainObject(name)) {
                 $.each(name, function(key, val) {
                     $this.duOption(key, val);
