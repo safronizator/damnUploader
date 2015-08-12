@@ -64,7 +64,7 @@ API
 
 **method**: HTTP method, 'POST' or 'PUT' (default: **'POST'**)
 
-**acceptType**: MIME type to accept (for example: 'image/\*' or 'image/png'; default: **null** - accept all)
+**acceptType**: accepted MIME type (for example: 'image/\*' or 'image/png'; default: **null** - accept all)
 
 
 ### Methods
